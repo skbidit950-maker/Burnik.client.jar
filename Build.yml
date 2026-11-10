@@ -1,0 +1,44 @@
+
+name: Build LOL Client JAR
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Extract ZIP
+        run: |
+          mkdir project
+          unzip -q "1lol-client-forge-61.2.5-with-build-workflow.zip" -d project
+
+      - name: Build JAR
+        working-directory: project
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon build
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: LOL-Client-JAR
+          path: project/build/libs/*.jar
+          if-no-files-found: error
+          
